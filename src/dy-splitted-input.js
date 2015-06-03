@@ -51,11 +51,8 @@
   DySplittedInputController.prototype.focusPrevField = function (currentField) {
     var currentFieldIndex = this._getIndexOfField(currentField);
     var prevField = this.fields[currentFieldIndex - 1];
-    var prevFieldVal;
 
     if (prevField) {
-      prevFieldVal = prevField.val();
-      prevField.val(prevFieldVal.slice(0, prevFieldVal.length - 1));
       prevField[0].focus();
     }
   };
@@ -85,17 +82,19 @@
 
         var prevVal;
 
-        $element.on('keydown', function (e) {
+        $element.on('keypress', function (e) {
           prevVal = $element.val() || '';
+
+          window.setTimeout(function () {
+              if ($element.val().length === +$attr.maxlength) {
+                ctrl.focusNextField($element, prevVal.length === +$attr.maxlength ? String.fromCharCode(e.keyCode) : null);
+              }
+          }, 0);
         });
 
-        $element.on('keyup', function (e) {
-          if (e.keyCode !== SHIFT_KEYCODE && e.keyCode !== TAB_KEYCODE) {
-            if ($element.val().length === +$attr.maxlength) {
-              ctrl.focusNextField($element, prevVal.length === +$attr.maxlength ? String.fromCharCode(e.keyCode) : null);
-            } else if (prevVal.length === 0 && e.keyCode === BACKSPACE_KEYCODE) {
-              ctrl.focusPrevField($element);
-            }
+        $element.on('keydown', function (e) {
+          if ($element.val().length === 0 && e.keyCode === BACKSPACE_KEYCODE) {
+            ctrl.focusPrevField($element);
           }
         })
       }
