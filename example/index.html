@@ -7,7 +7,12 @@
   </head>
   <body>
     <div ng-app="example">
-      <input type="text" dy-splitted-input ng-model="value">
+      <dy-splitted-input ng-model="value">
+        <input type="text" dy-splitted-input-field maxlength="2" />
+        <input type="text" dy-splitted-input-field maxlength="2" />
+        <input type="text" dy-splitted-input-field maxlength="2" />
+        <input type="text" dy-splitted-input-field maxlength="2" />
+      </dy-splitted-input>
       <pre>
         Value: {{ value }}
       </pre>
