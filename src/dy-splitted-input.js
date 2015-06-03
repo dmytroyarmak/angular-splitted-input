@@ -31,20 +31,32 @@
     this.fields.push(field);
   };
 
-  DySplittedInputController.prototype.focusNextField = function (currentField) {
-    this._focusOffsetField(currentField, +1);
+  DySplittedInputController.prototype.focusNextField = function (currentField, newValue) {
+    var currentFieldIndex = this._getIndexOfField(currentField);
+    var nextField = this.fields[currentFieldIndex + 1];
+
+    if (nextField) {
+      if (newValue) {
+        nextField.val(newValue);
+      }
+
+      nextField[0].focus();
+
+      if (!newValue) {
+        nextField[0].select();
+      }
+    }
   };
 
   DySplittedInputController.prototype.focusPrevField = function (currentField) {
-    this._focusOffsetField(currentField, -1);
-  };
-
-  DySplittedInputController.prototype._focusOffsetField = function (currentField, offset) {
     var currentFieldIndex = this._getIndexOfField(currentField);
-    var offsetField = this.fields[currentFieldIndex + offset];
+    var prevField = this.fields[currentFieldIndex - 1];
+    var prevFieldVal;
 
-    if (offsetField) {
-      offsetField[0].focus();
+    if (prevField) {
+      prevFieldVal = prevField.val();
+      prevField.val(prevFieldVal.slice(0, prevFieldVal.length - 1));
+      prevField[0].focus();
     }
   };
 
@@ -71,15 +83,17 @@
       link: function ($scope, $element, $attr, ctrl) {
         ctrl.registerField($element);
 
+        var prevVal;
+
+        $element.on('keydown', function (e) {
+          prevVal = $element.val() || '';
+        });
+
         $element.on('keyup', function (e) {
-          var length;
-
-          if (e.which !== SHIFT_KEYCODE && e.which !== TAB_KEYCODE) {
-            length = $element.val().length;
-
-            if (length === +$attr.maxlength && e.which !== TAB_KEYCODE) {
-              ctrl.focusNextField($element);
-            } else if (length === 0 && e.which === BACKSPACE_KEYCODE) {
+          if (e.keyCode !== SHIFT_KEYCODE && e.keyCode !== TAB_KEYCODE) {
+            if ($element.val().length === +$attr.maxlength) {
+              ctrl.focusNextField($element, prevVal.length === +$attr.maxlength ? String.fromCharCode(e.keyCode) : null);
+            } else if (prevVal.length === 0 && e.keyCode === BACKSPACE_KEYCODE) {
               ctrl.focusPrevField($element);
             }
           }
